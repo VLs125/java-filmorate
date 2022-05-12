@@ -6,6 +6,7 @@ import ru.yandex.practicum.filmorate.custom_validation.annotation.ReleaseDateVal
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 @Data
@@ -13,6 +14,7 @@ import javax.validation.constraints.Size;
 public class Film {
     private int id;
     @NotEmpty
+    @NotNull
     private String name;
     @Size(min = 1, max = 200)
     private String description;
