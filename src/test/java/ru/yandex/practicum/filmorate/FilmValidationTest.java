@@ -29,6 +29,7 @@ public class FilmValidationTest {
 
         String response = this.restTemplate.postForObject("http://localhost:" + port + "/films", film,
                 String.class);
+        System.out.println(response);
         Assertions.assertTrue(response.contains("\"error\":\"Bad Request\""));
         Assertions.assertTrue(response.contains("\"status\":400"));
 
