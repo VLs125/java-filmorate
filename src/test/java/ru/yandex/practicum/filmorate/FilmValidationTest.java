@@ -26,7 +26,6 @@ public class FilmValidationTest {
         film.setId(1);
         film.setReleaseDate("1965-12-22");
         film.setDuration(200);
-
         String response = this.restTemplate.postForObject("http://localhost:" + port + "/films", film,
                 String.class);
         System.out.println(response);
@@ -43,7 +42,6 @@ public class FilmValidationTest {
         film.setId(1);
         film.setReleaseDate("1965-12-22");
         film.setDuration(200);
-
         String response = this.restTemplate.postForObject("http://localhost:" + port + "/films", film,
                 String.class);
         Assertions.assertTrue(response.contains("\"error\":\"Bad Request\""));
@@ -58,7 +56,6 @@ public class FilmValidationTest {
         film.setId(1);
         film.setReleaseDate("1965-12-22");
         film.setDuration(200);
-
         String response = this.restTemplate.postForObject("http://localhost:" + port + "/films", film,
                 String.class);
         Assertions.assertTrue(response.contains("\"error\":\"Bad Request\""));
@@ -73,7 +70,6 @@ public class FilmValidationTest {
         film.setId(1);
         film.setReleaseDate("1865-12-22");
         film.setDuration(200);
-
         String response = this.restTemplate.postForObject("http://localhost:" + port + "/films", film,
                 String.class);
         Assertions.assertTrue(response.contains("\"error\":\"Bad Request\""));
@@ -88,7 +84,6 @@ public class FilmValidationTest {
         film.setId(1);
         film.setReleaseDate("1865-12-22");
         film.setDuration(0);
-
         String response = this.restTemplate.postForObject("http://localhost:" + port + "/films", film,
                 String.class);
         Assertions.assertTrue(response.contains("\"error\":\"Bad Request\""));
