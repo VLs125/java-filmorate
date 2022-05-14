@@ -10,53 +10,53 @@ import ru.yandex.practicum.filmorate.model.Film;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Slf4j
 @RestController
-@RequestMapping("/")
+@RequestMapping("/films")
 public class FilmController {
-    private final HashSet<Film> films = new HashSet<>();
+    private final HashMap<Long,Film> films = new HashMap<>();
 
-    @GetMapping("/films")
+    private void checkValidationError(HttpServletRequest request, BindingResult res) {
+        if (res.hasErrors()) {
+            log.warn("Ошибка валидации метода: '{}' ошибка: '{}' ",
+                    request.getRequestURI(), res.getFieldError());
+            throw new ValidationException(Objects.requireNonNull(res.getFieldError()).toString());
+        }
+    }
+
+    @GetMapping
     public List<Film> findAllFilms(HttpServletRequest request) {
         log.info("Получен запрос к эндпоинту: '{} {}'",
                 request.getMethod(), request.getRequestURI());
-        return new ArrayList<>(films);
+        return new ArrayList<>(films.values());
     }
 
-    @PostMapping(value = "/films")
+    @PostMapping
     public ResponseEntity<Film> createFilm(@Valid @RequestBody Film film
             , BindingResult bindingResult, HttpServletRequest request) throws ValidationException {
-        if (bindingResult.hasErrors()) {
-            log.warn("Ошибка валидации метода: '{}' ошибка: '{}' ",
-                    request.getRequestURI(), bindingResult.getFieldError());
-            throw new ValidationException(Objects.requireNonNull(bindingResult.getFieldError()).toString());
-        }
+
+        checkValidationError(request, bindingResult);
+
         log.info("Получен запрос к эндпоинту: '{} {}' c телом '{}'",
                 request.getMethod(), request.getRequestURI(), film);
-        films.add(film);
-        return new ResponseEntity<>(film, HttpStatus.OK);
+        films.put(film.getId(),film);
+        return ResponseEntity.ok(film);
 
     }
 
-    @PutMapping("/films")
+    @PutMapping
     public ResponseEntity<Film> updateFilm(@Valid @RequestBody Film film
             , BindingResult bindingResult
             , HttpServletRequest request) throws ValidationException {
 
-        if (bindingResult.hasErrors()) {
-            log.warn("Ошибка валидации метода: '{}' ошибка: '{}' ",
-                    request.getRequestURI(), bindingResult.getFieldError());
-            throw new ValidationException(Objects.requireNonNull(bindingResult.getFieldError()).toString());
-        }
+        checkValidationError(request, bindingResult);
+
         log.info("Получен запрос к эндпоинту: '{} {}' c телом '{}'",
                 request.getMethod(), request.getRequestURI(), film);
-        films.add(film);
-        return new ResponseEntity<>(film, HttpStatus.OK);
+        films.put(film.getId(),film);
+        return ResponseEntity.ok(film);
 
     }
 }

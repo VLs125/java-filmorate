@@ -11,55 +11,54 @@ import ru.yandex.practicum.filmorate.model.User;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Slf4j
 @RestController
-@RequestMapping("/")
+@RequestMapping("/users")
 public class UserController {
-    private final HashSet<User> users = new HashSet<>();
+    private final HashMap<Long,User> users = new HashMap<>();
 
-    @GetMapping("/users")
+    private void checkValidationError(HttpServletRequest request, BindingResult res) {
+        if (res.hasErrors()) {
+            log.warn("Ошибка валидации метода: '{}' ошибка: '{}' ",
+                    request.getRequestURI(), res.getFieldError());
+            throw new ValidationException(Objects.requireNonNull(res.getFieldError()).toString());
+        }
+    }
+
+    @GetMapping
     public List<User> findAllUsers(HttpServletRequest request) {
         log.info("Получен запрос к эндпоинту: '{} {}'",
                 request.getMethod(), request.getRequestURI());
-        return new ArrayList<>(users);
+        return new ArrayList<>(users.values());
     }
 
-    @PostMapping(value = "/users")
+    @PostMapping
     public ResponseEntity<User> createUser(@Valid @RequestBody User user
             , BindingResult bindingResult, HttpServletRequest request) throws ValidationException {
 
-        if (bindingResult.hasErrors()) {
-            log.warn("Ошибка валидации метода: '{}' ошибка: '{}' ",
-                    request.getRequestURI(), bindingResult.getFieldError());
-            throw new ValidationException(Objects.requireNonNull(bindingResult.getFieldError()).toString());
-        }
-            users.add(user);
-            return new ResponseEntity<>(user, HttpStatus.OK);
+        checkValidationError(request, bindingResult);
+
+        users.put(user.getId(),user);
+        return ResponseEntity.ok(user);
 
     }
 
-    @PutMapping("/users")
+    @PutMapping
     public ResponseEntity<User> updateUser(@Valid @RequestBody User user
             , BindingResult bindingResult
-            ,HttpServletRequest request) throws ValidationException {
+            , HttpServletRequest request) throws ValidationException {
 
-        if (bindingResult.hasErrors()) {
-            log.warn("Ошибка валидации метода: '{}' ошибка: '{}' ",
-                    request.getRequestURI(), bindingResult.getFieldError());
-            throw new ValidationException(Objects.requireNonNull(bindingResult.getFieldError()).toString());
-        }
-        if(user.getName().isEmpty() || user.getName().isBlank()){
+        checkValidationError(request, bindingResult);
+
+        if (user.getName().isEmpty() || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
         log.info("Получен запрос к эндпоинту: '{} {}' c телом '{}'",
                 request.getMethod(), request.getRequestURI(), user);
-        users.add(user);
-        return new ResponseEntity<>(user, HttpStatus.OK);
+        users.put(user.getId(),user);
+        return  ResponseEntity.ok(user);
 
     }
 

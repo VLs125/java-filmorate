@@ -12,7 +12,7 @@ import javax.validation.constraints.Size;
 @Data
 @Slf4j
 public class Film {
-    private int id;
+    private long id;
     @NotEmpty
     @NotNull
     private String name;
