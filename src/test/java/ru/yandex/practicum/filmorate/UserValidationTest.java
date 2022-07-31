@@ -24,7 +24,7 @@ public class UserValidationTest {
     @Test
     public void shouldReturnErrorWhenEmptyEmail() {
         User user = new User();
-        user.setId(1);
+        user.setId(1L);
         user.setName("name");
         user.setEmail("");
         user.setLogin("login");
@@ -38,7 +38,7 @@ public class UserValidationTest {
     @Test
     public void shouldReturnErrorWhenNotValidEmail() {
         User user = new User();
-        user.setId(1);
+        user.setId(1L);
         user.setName("name");
         user.setEmail("v.v");
         user.setLogin("login");
@@ -52,7 +52,7 @@ public class UserValidationTest {
     @Test
     public void shouldReturnErrorWhenEmptyLogin() {
         User user = new User();
-        user.setId(1);
+        user.setId(1L);
         user.setName("name");
         user.setEmail("v@v.com");
         user.setLogin("");
@@ -66,7 +66,7 @@ public class UserValidationTest {
     @Test
     public void shouldReturnErrorWhenDateBirthdayInFuture() {
         User user = new User();
-        user.setId(1);
+        user.setId(1L);
         user.setName("name");
         user.setEmail("v@v.com");
         user.setLogin("login");
