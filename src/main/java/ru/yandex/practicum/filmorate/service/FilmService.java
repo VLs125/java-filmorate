@@ -4,25 +4,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
-import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 import ru.yandex.practicum.filmorate.comparator.FilmsLikeComparator;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static ru.yandex.practicum.filmorate.validator.ObjectNotFoundValidation.checkObjectNotNull;
 
 
 @Service
 public class FilmService {
     private FilmsLikeComparator comparator;
-    private final InMemoryFilmStorage filmStorage;
+    private final FilmStorage filmStorage;
 
     @Autowired
     public FilmService(FilmsLikeComparator comparator,
-                       InMemoryFilmStorage filmStorage) {
+                       FilmStorage filmStorage) {
         this.comparator = comparator;
         this.filmStorage = filmStorage;
     }
@@ -60,8 +56,14 @@ public class FilmService {
         int countFromString = Integer.parseInt(count);
         List<Film> result = new ArrayList<>();
         List<Long> filmIdList = sortedMap.values().stream().limit(countFromString).collect(Collectors.toList());
-        filmIdList.forEach(i -> result.add(filmStorage.getFilmById(i)));
+        filmIdList.forEach(i -> result.add(filmStorage.getById(i)));
         return result;
+
+    }
+
+    public void deleteFilmFromRating(long id) {
+        sortedMap.remove(filmRateStorage.get(id).size());
+        filmRateStorage.remove(id);
 
     }
 

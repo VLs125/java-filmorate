@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -12,10 +12,10 @@ import java.util.stream.Stream;
 
 @Service
 public class UserService {
-    InMemoryUserStorage userStorage;
+    UserStorage userStorage;
 
     @Autowired
-    public UserService(InMemoryUserStorage userStorage) {
+    public UserService(UserStorage userStorage) {
         this.userStorage = userStorage;
     }
 
@@ -33,16 +33,16 @@ public class UserService {
     }
 
     public void addToFriends(long id, long userId) {
-        User otherUser = userStorage.getUserById(userId);
-        User user = userStorage.getUserById(id);
+        User otherUser = userStorage.getById(userId);
+        User user = userStorage.getById(id);
         addFriends(user, otherUser);
         addFriends(otherUser, user);
 
     }
 
     public void deleteFromFriends(long id, long userId) {
-        User otherUser = userStorage.getUserById(userId);
-        User user = userStorage.getUserById(id);
+        User otherUser = userStorage.getById(userId);
+        User user = userStorage.getById(id);
         if (!friendsStorage.containsKey(user)) {
             throw new ObjectNotFoundException();
         }
@@ -53,7 +53,7 @@ public class UserService {
     }
 
     public List<User> getAllFriends(long id) {
-        User user = userStorage.getUserById(id);
+        User user = userStorage.getById(id);
         if (!friendsStorage.containsKey(user)) {
             return new ArrayList<>();
         }
@@ -62,16 +62,21 @@ public class UserService {
 
     public List<User> getAllCommonFriends(long id, long userId) {
         HashSet<User> mergedSet = new HashSet<>();
-        User user = userStorage.getUserById(id);
-        User otherUser = userStorage.getUserById(userId);
+        User user = userStorage.getById(id);
+        User otherUser = userStorage.getById(userId);
         if (!friendsStorage.containsKey(user)) {
             return new ArrayList<>();
         }
         Stream.of(friendsStorage.get(user).stream().filter(i -> i.getId() != userId).collect(Collectors.toList())
-                , friendsStorage.get(otherUser).stream().filter(i -> i.getId() != id).collect(Collectors.toList()))
+                        , friendsStorage.get(otherUser).stream().filter(i -> i.getId() != id).collect(Collectors.toList()))
                 .forEach(mergedSet::addAll);
 
         return new ArrayList<>(mergedSet);
+    }
+
+    public void deleteUserFromFriendsStorage(long id) {
+        User deletedUser = userStorage.getById(id);
+        friendsStorage.remove(deletedUser);
     }
 
 }

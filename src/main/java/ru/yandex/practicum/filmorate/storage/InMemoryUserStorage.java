@@ -15,7 +15,7 @@ public class InMemoryUserStorage implements UserStorage {
     private final HashMap<Long, User> users = new HashMap<>();
 
     @Override
-    public long createUser(User user) {
+    public long create(User user) {
         checkName(user);
         user.setId(getId());
         users.put(user.getId(), user);
@@ -24,12 +24,15 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public void deleteUser(User user) {
-        users.remove(user.getId());
+    public void delete(long userId) {
+        if (!users.containsKey(userId)) {
+            throw new ObjectNotFoundException();
+        }
+        users.remove(userId);
     }
 
     @Override
-    public void updateUser(User user) {
+    public void update(User user) {
         if (!users.containsKey(user.getId())) {
             throw new ObjectNotFoundException();
         }
@@ -38,12 +41,12 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public List<User> getAllUsers() {
+    public List<User> getAll() {
         return new ArrayList<>(users.values());
     }
 
     @Override
-    public User getUserById(Long id) {
+    public User getById(long id) {
         if (!users.containsKey(id)) {
             throw new ObjectNotFoundException();
         }

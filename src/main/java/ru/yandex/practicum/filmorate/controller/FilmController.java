@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -22,11 +22,11 @@ import static ru.yandex.practicum.filmorate.validator.RequestValadation.checkVal
 @RequestMapping("/films")
 public class FilmController {
 
-    InMemoryFilmStorage filmStorage;
+    FilmStorage filmStorage;
     FilmService filmService;
 
     @Autowired
-    public FilmController(InMemoryFilmStorage filmStorage, FilmService filmService) {
+    public FilmController(FilmStorage filmStorage, FilmService filmService) {
         this.filmStorage = filmStorage;
         this.filmService = filmService;
     }
@@ -36,14 +36,23 @@ public class FilmController {
     public List<Film> findAllFilms(HttpServletRequest request) {
         log.info("Получен запрос к эндпоинту: '{} {}'",
                 request.getMethod(), request.getRequestURI());
-        return filmStorage.getAllFilms();
+        return filmStorage.getAll();
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Film> getFilmById(HttpServletRequest request, @PathVariable int id) {
         log.info("Получен запрос к эндпоинту: '{} {}'",
                 request.getMethod(), request.getRequestURI());
-        return ResponseEntity.ok(filmStorage.getFilmById(id));
+        return ResponseEntity.ok(filmStorage.getById(id));
+    }
+
+    @DeleteMapping("/{id}")
+    public String deleteFilm(HttpServletRequest request, @PathVariable int id) {
+        log.info("Получен запрос к эндпоинту: '{} {}'",
+                request.getMethod(), request.getRequestURI());
+        filmStorage.delete(id);
+        filmService.deleteFilmFromRating(id);
+        return "Фильм удален";
     }
 
     @PostMapping
@@ -54,7 +63,7 @@ public class FilmController {
 
         log.info("Получен запрос к эндпоинту: '{} {}' c телом '{}'",
                 request.getMethod(), request.getRequestURI(), film);
-        filmStorage.createFilm(film);
+        filmStorage.create(film);
         filmService.addFilmToRatingWithoutLikes(film);
         return ResponseEntity.ok(film);
 
@@ -69,7 +78,7 @@ public class FilmController {
 
         log.info("Получен запрос к эндпоинту: '{} {}' c телом '{}'",
                 request.getMethod(), request.getRequestURI(), film);
-        filmStorage.updateFilm(film);
+        filmStorage.update(film);
         return ResponseEntity.ok(film);
 
     }

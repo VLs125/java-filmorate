@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -19,11 +19,11 @@ import java.util.*;
 @RestController
 @RequestMapping("/users")
 public class UserController {
-    InMemoryUserStorage userStorage;
+    UserStorage userStorage;
     UserService userService;
 
     @Autowired
-    public UserController(InMemoryUserStorage userStorage, UserService userService) {
+    public UserController(UserStorage userStorage, UserService userService) {
         this.userStorage = userStorage;
         this.userService = userService;
     }
@@ -40,12 +40,19 @@ public class UserController {
     public List<User> findAllUsers(HttpServletRequest request) {
         log.info("Получен запрос к эндпоинту: '{} {}'",
                 request.getMethod(), request.getRequestURI());
-        return userStorage.getAllUsers();
+        return userStorage.getAll();
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<User> getUser(@PathVariable long id) {
-        return ResponseEntity.ok(userStorage.getUserById(id));
+        return ResponseEntity.ok(userStorage.getById(id));
+    }
+
+    @DeleteMapping("/{id}")
+    public String deleteUser(@PathVariable long id) {
+        userService.deleteUserFromFriendsStorage(id);
+        userStorage.delete(id);
+        return "пользователь удален";
     }
 
     @PostMapping
@@ -53,9 +60,8 @@ public class UserController {
             , BindingResult bindingResult, HttpServletRequest request) throws ValidationException {
 
         checkValidationError(request, bindingResult);
-        long id = userStorage.createUser(user);
-        return ResponseEntity.ok(userStorage.getUserById(id));
-
+        long id = userStorage.create(user);
+        return ResponseEntity.ok(userStorage.getById(id));
     }
 
     @PutMapping
@@ -67,9 +73,8 @@ public class UserController {
 
         log.info("Получен запрос к эндпоинту: '{} {}' c телом '{}'",
                 request.getMethod(), request.getRequestURI(), user);
-        userStorage.updateUser(user);
+        userStorage.update(user);
         return ResponseEntity.ok(user);
-
     }
 
     @PutMapping("/{id}/friends/{friendId}")
