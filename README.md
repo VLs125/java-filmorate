@@ -44,6 +44,7 @@ SELECT f.name,
 COUNT(lf.user) AS like_count  
 FROM film AS f  
 LEFT JOIN liked_film AS lm ON film.id = lm.id  
-ORDER BY COUNT(like_count) ASC LIMIT 10;  
+ORDER BY COUNT(like_count) ASC 
+LIMIT 10;  
 ```
   
