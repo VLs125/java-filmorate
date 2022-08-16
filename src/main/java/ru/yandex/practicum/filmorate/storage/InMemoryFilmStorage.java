@@ -15,18 +15,22 @@ public class InMemoryFilmStorage implements FilmStorage {
     private long id = 1;
 
     @Override
-    public Film getById(long id) {
+    public Film getById(int id) {
         if (!films.containsKey(id)) {
             throw new ObjectNotFoundException();
         }
         return films.get(id);
     }
 
+    public List<Film> getMostPopularFilms(String count) {
+        return new ArrayList<>();
+    }
+
     @Override
     public void create(Film film) {
-        film.setId(getId());
-        incrementId();
-        films.put(film.getId(), film);
+//        film.setId(getId());
+//        incrementId();
+//        films.put(film.getId(), film);
     }
 
     @Override
@@ -34,12 +38,12 @@ public class InMemoryFilmStorage implements FilmStorage {
         if (!films.containsKey(film.getId())) {
             throw new ObjectNotFoundException();
         }
-        films.put(film.getId(), film);
+//        films.put(film.getId(), film);
 
     }
 
     @Override
-    public void delete(long id) {
+    public void delete(int id) {
         if (!films.containsKey(id)) {
             throw new ObjectNotFoundException();
         }

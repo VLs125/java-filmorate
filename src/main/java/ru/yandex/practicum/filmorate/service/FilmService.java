@@ -1,70 +1,72 @@
 package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCallback;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dao.GenresDao;
+import ru.yandex.practicum.filmorate.dao.LikeDao;
+import ru.yandex.practicum.filmorate.dao.RateDao;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.comparator.FilmsLikeComparator;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 @Service
 public class FilmService {
-    private FilmsLikeComparator comparator;
-    private final FilmStorage filmStorage;
+    private final GenresDao genresDao;
+    private final RateDao rateDao;
+    private final LikeDao likeDao;
 
     @Autowired
-    public FilmService(FilmsLikeComparator comparator,
-                       FilmStorage filmStorage) {
-        this.comparator = comparator;
-        this.filmStorage = filmStorage;
-    }
-
-    HashMap<Long, List<Long>> filmRateStorage = new HashMap<>();
-    TreeMap<Integer, Long> sortedMap = new TreeMap<>(comparator);
-
-    public void addFilmToRatingWithoutLikes(Film film) {
-        filmRateStorage.put(film.getId(), new ArrayList<>());
-        sortedMap.put(filmRateStorage.get(film.getId()).size(), film.getId());
-    }
-
-    public void addLikeToFilm(Long filmId, Long userId) {
-        List<Long> userLikedFilmList = filmRateStorage.get(filmId);
-        if (!userLikedFilmList.contains(userId)) {
-            userLikedFilmList.add(userId);
-        }
-        filmRateStorage.put(filmId, userLikedFilmList);
-        sortedMap.put(filmRateStorage.get(filmId).size(), filmId);
+    public FilmService(
+            GenresDao genresDao, RateDao rateDao, LikeDao likeDao) {
+        this.genresDao = genresDao;
+        this.rateDao = rateDao;
+        this.likeDao = likeDao;
 
     }
 
-    public void deleteLikeFromFilm(Long filmId, Long userId) {
-        List<Long> userLikedFilmList = filmRateStorage.get(filmId);
-        if (!userLikedFilmList.contains(userId)) {
-            throw new ObjectNotFoundException();
-        }
-        userLikedFilmList.remove(userId);
-        filmRateStorage.put(filmId, userLikedFilmList);
-        sortedMap.put(filmRateStorage.get(filmId).size(), filmId);
-
+    public void deleteGenresFromFilm(int id) {
+        genresDao.deleteGenresFromFilm(id);
     }
 
-    public List<Film> getTenMostPopularFilms(String count) {
-        int countFromString = Integer.parseInt(count);
-        List<Film> result = new ArrayList<>();
-        List<Long> filmIdList = sortedMap.values().stream().limit(countFromString).collect(Collectors.toList());
-        filmIdList.forEach(i -> result.add(filmStorage.getById(i)));
-        return result;
-
+    public void addGenreFromFilm(Film film) {
+        genresDao.addGenreFromFilm(film);
     }
 
-    public void deleteFilmFromRating(long id) {
-        sortedMap.remove(filmRateStorage.get(id).size());
-        filmRateStorage.remove(id);
+    public void addFilmToRating(Film film) {
+        rateDao.addFilmToRating(film);
+    }
 
+    public void addLikeToFilm(int filmId, int userId) {
+        likeDao.addLikeToFilm(filmId, userId);
+    }
+
+    public void updateFilmRating(int filmId) {
+        rateDao.updateFilmRating(filmId);
+    }
+
+    public void deleteLikeFromFilm(int filmId, int userId) {
+        likeDao.deleteLikeFromFilm(filmId, userId);
+    }
+
+    public void deleteLikeFromFilm(int filmId) {
+        likeDao.deleteLikeFromFilm(filmId);
+    }
+
+    public List<Film> getMostPopularFilms(String count) {
+        return rateDao.getMostPopularFilms(count);
+    }
+
+
+    public void deleteFilmFromRating(int id) {
+        rateDao.deleteFromRating(id);
     }
 
 }

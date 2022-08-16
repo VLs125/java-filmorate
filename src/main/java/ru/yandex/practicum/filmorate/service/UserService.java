@@ -1,82 +1,46 @@
 package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
+import ru.yandex.practicum.filmorate.dao.FriendshipDao;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
 
 @Service
 public class UserService {
     UserStorage userStorage;
+    FriendshipDao friendshipDao;
 
     @Autowired
-    public UserService(UserStorage userStorage) {
+    public UserService(@Qualifier("userDBStorage") UserStorage userStorage,
+                       FriendshipDao friendshipDao) {
         this.userStorage = userStorage;
+        this.friendshipDao = friendshipDao;
     }
 
-    HashMap<User, HashSet<User>> friendsStorage = new HashMap<>();
 
-    private void addFriends(User user, User otherUser) {
-        if (!friendsStorage.containsKey(user)) {
-            HashSet<User> userFriends = new HashSet<>();
-            userFriends.add(otherUser);
-            friendsStorage.put(user, userFriends);
-        }
-        HashSet<User> userFriends = friendsStorage.get(user);
-        userFriends.add(otherUser);
-        friendsStorage.put(user, userFriends);
+    public void addToFriends(int id, int userId) {
+        friendshipDao.addToFriends(id, userId);
     }
 
-    public void addToFriends(long id, long userId) {
-        User otherUser = userStorage.getById(userId);
-        User user = userStorage.getById(id);
-        addFriends(user, otherUser);
-        addFriends(otherUser, user);
-
+    public void deleteFromFriends(int id, int userId) {
+        friendshipDao.deleteFromFriends(id, userId);
     }
 
-    public void deleteFromFriends(long id, long userId) {
-        User otherUser = userStorage.getById(userId);
-        User user = userStorage.getById(id);
-        if (!friendsStorage.containsKey(user)) {
-            throw new ObjectNotFoundException();
-        }
-        HashSet<User> friends = friendsStorage.get(user);
-        friends.remove(otherUser);
-        friendsStorage.put(user, friends);
-
+    public List<User> getAllFriends(int id) {
+        return friendshipDao.getAllFriends(id);
     }
 
-    public List<User> getAllFriends(long id) {
-        User user = userStorage.getById(id);
-        if (!friendsStorage.containsKey(user)) {
-            return new ArrayList<>();
-        }
-        return new ArrayList<>(friendsStorage.get(user));
+    public List<User> getAllCommonFriends(int id, int userId) {
+        return friendshipDao.getAllCommonFriends(id, userId);
     }
 
-    public List<User> getAllCommonFriends(long id, long userId) {
-        HashSet<User> mergedSet = new HashSet<>();
-        User user = userStorage.getById(id);
-        User otherUser = userStorage.getById(userId);
-        if (!friendsStorage.containsKey(user)) {
-            return new ArrayList<>();
-        }
-        Stream.of(friendsStorage.get(user).stream().filter(i -> i.getId() != userId).collect(Collectors.toList())
-                        , friendsStorage.get(otherUser).stream().filter(i -> i.getId() != id).collect(Collectors.toList()))
-                .forEach(mergedSet::addAll);
-
-        return new ArrayList<>(mergedSet);
-    }
-
-    public void deleteUserFromFriendsStorage(long id) {
-        User deletedUser = userStorage.getById(id);
-        friendsStorage.remove(deletedUser);
+    public void deleteUserFromFriendsWhenUserDeleted(int id) {
+        friendshipDao.deleteFromFriendsWhenUserDeleted(id);
     }
 
 }
