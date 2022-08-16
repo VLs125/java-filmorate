@@ -89,14 +89,22 @@ public class FilmDBStorage implements FilmStorage {
 
     @Override
     public List<Film> getAll() {
-        final String sqlQuery = "SELECT * FROM FILM";
+        final String sqlQuery = "SELECT f.*," +
+                "M.TITLE , " +
+                "ARRAY_AGG(FG.genre_id || ':' || g.name) AS genres_id " +
+                "FROM FILM as F " +
+                "LEFT JOIN FILM_RATE FR on F.id = FR.film_id " +
+                "LEFT JOIN FILM_GENRES FG ON F.id = FG.film_id  " +
+                "LEFT JOIN GENRE G ON FG.genre_id = G.id " +
+                "LEFT JOIN MPA M ON F.mpa_id  = M.id " +
+                "GROUP BY f.ID ";
         return jdbcTemplate.query(sqlQuery, FilmDBStorage::makeFilm);
     }
 
     @Override
     public Film getById(int id) {
         final String sqlQuery = "SELECT f.*," +
-                "M.TITLE mpa_name, " +
+                "M.TITLE , " +
                 "ARRAY_AGG(FG.genre_id || ':' || g.name) AS genres_id " +
                 "FROM FILM as F " +
                 "LEFT JOIN FILM_RATE FR on F.id = FR.film_id " +
@@ -115,7 +123,7 @@ public class FilmDBStorage implements FilmStorage {
     }
 
     public static Film makeFilm(ResultSet rs, int rowNum) throws SQLException {
-        Mpa mpa = new Mpa(rs.getInt("mpa_id"), rs.getString("mpa_name"));
+        Mpa mpa = new Mpa(rs.getInt("mpa_id"), rs.getString("title"));
         Set<Genre> genres_id = null;
         Object genreFromRow = rs.getArray("genres_id");
         if (genreFromRow != null) {

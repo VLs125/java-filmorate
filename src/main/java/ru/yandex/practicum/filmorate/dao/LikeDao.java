@@ -17,9 +17,7 @@ public class LikeDao {
     }
 
     public void addLikeToFilm(int filmId, int userId) {
-        String sql = "INSERT INTO LIKED_FILM (USER_ID,FILM_ID)" +
-                "VALUES ((SELECT id FROM USER WHERE id = ?), " +
-                "(SELECT id FROM FILM WHERE id = ?))";
+        String sql = "INSERT INTO LIKED_FILM (USER_ID,FILM_ID)" + "VALUES ((SELECT id FROM USER WHERE id = ?), " + "(SELECT id FROM FILM WHERE id = ?))";
         int result = jdbcTemplate.update(sql, userId, filmId);
         if (result != 1) {
             throw new ObjectNotFoundException();
@@ -43,14 +41,11 @@ public class LikeDao {
     public void deleteLikeFromFilm(int filmId) {
         String sql = "DELETE FROM LIKED_FILM WHERE FILM_ID = ?";
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        int result = jdbcTemplate.update(connection -> {
+        jdbcTemplate.update(connection -> {
             PreparedStatement stmt = connection.prepareStatement(sql);
             stmt.setInt(1, filmId);
             return stmt;
         }, keyHolder);
-        if (result != 1) {
-            throw new ObjectNotFoundException();
-        }
     }
 
 }

@@ -51,8 +51,8 @@ public class UserController {
 
     @DeleteMapping("/{id}")
     public String deleteUser(@PathVariable int id) {
-        userStorage.delete(id);
         userService.deleteUserFromFriendsWhenUserDeleted(id);
+        userStorage.delete(id);
         return "пользователь удален";
     }
 

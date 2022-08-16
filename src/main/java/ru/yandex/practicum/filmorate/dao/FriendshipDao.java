@@ -58,15 +58,12 @@ public class FriendshipDao {
 
     public void deleteFromFriendsWhenUserDeleted(int id) {
         String sql = "DELETE FROM FRIENDSHIP WHERE USER_SENDER_INVITE = ? OR USER_RECEIVED_INVITE = ?";
-        int result = jdbcTemplate.update(connection -> {
+        jdbcTemplate.update(connection -> {
             PreparedStatement stmt = connection.prepareStatement(sql, new String[]{"ID"});
             stmt.setInt(1, id);
             stmt.setInt(2, id);
             return stmt;
         });
-        if (result != 1) {
-            throw new ObjectNotFoundException();
-        }
     }
 
     public List<User> getAllFriends(int id) {
