@@ -34,21 +34,21 @@ public class FilmController {
 
 
     @GetMapping
-    public List<Film> findAllFilms(HttpServletRequest request) {
+    public List<Film> findAll(HttpServletRequest request) {
         log.info("Получен запрос к эндпоинту: '{} {}'",
                 request.getMethod(), request.getRequestURI());
         return filmStorage.getAll();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Film> getFilmById(HttpServletRequest request, @PathVariable int id) {
+    public ResponseEntity<Film> getById(HttpServletRequest request, @PathVariable int id) {
         log.info("Получен запрос к эндпоинту: '{} {}'",
                 request.getMethod(), request.getRequestURI());
         return ResponseEntity.ok(filmStorage.getById(id));
     }
 
     @DeleteMapping("/{id}")
-    public String deleteFilm(HttpServletRequest request, @PathVariable int id) {
+    public String delete(HttpServletRequest request, @PathVariable int id) {
         log.info("Получен запрос к эндпоинту: '{} {}'",
                 request.getMethod(), request.getRequestURI());
         filmStorage.delete(id);
@@ -59,7 +59,7 @@ public class FilmController {
     }
 
     @PostMapping
-    public ResponseEntity<Film> createFilm(@Valid @RequestBody Film film
+    public ResponseEntity<Film> create(@Valid @RequestBody Film film
             , BindingResult bindingResult, HttpServletRequest request) throws ValidationException {
 
         checkValidationError(request, bindingResult);
@@ -74,7 +74,7 @@ public class FilmController {
     }
 
     @PutMapping
-    public ResponseEntity<Film> updateFilm(@Valid @RequestBody Film film
+    public ResponseEntity<Film> update(@Valid @RequestBody Film film
             , BindingResult bindingResult
             , HttpServletRequest request) throws ValidationException {
 
@@ -92,7 +92,7 @@ public class FilmController {
 
     @PutMapping("/{id}/like/{userId}")
     @ResponseStatus(code = HttpStatus.OK)
-    public String addLikesToFilm(@PathVariable int id, @PathVariable int userId) {
+    public String addLikes(@PathVariable int id, @PathVariable int userId) {
         filmService.addLikeToFilm(id, userId);
         filmService.updateFilmRating(id);
         return "Лайк поставлен";
@@ -100,7 +100,7 @@ public class FilmController {
 
     @DeleteMapping("/{id}/like/{userId}")
     @ResponseStatus(code = HttpStatus.OK)
-    public String deleteLikesFromFilm(@PathVariable int id, @PathVariable int userId) {
+    public String deleteLike(@PathVariable int id, @PathVariable int userId) {
         filmService.deleteLikeFromFilm(id, userId);
         filmService.updateFilmRating(id);
         return "Лайк удален";
@@ -108,7 +108,7 @@ public class FilmController {
 
     @GetMapping("/popular")
     @ResponseStatus(code = HttpStatus.OK)
-    public List<Film> getPopularFilmsByCount(@RequestParam(required = false, defaultValue = "10") String count) {
+    public List<Film> getPopularByCount(@RequestParam(required = false, defaultValue = "10") String count) {
         return filmService.getMostPopularFilms(count);
     }
 

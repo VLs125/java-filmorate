@@ -38,33 +38,33 @@ public class UserController {
     }
 
     @GetMapping()
-    public List<User> findAllUsers(HttpServletRequest request) {
+    public List<User> findAll(HttpServletRequest request) {
         log.info("Получен запрос к эндпоинту: '{} {}'",
                 request.getMethod(), request.getRequestURI());
         return userStorage.getAll();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUser(@PathVariable int id) {
+    public ResponseEntity<User> getById(@PathVariable int id) {
         return ResponseEntity.ok(userStorage.getById(id));
     }
 
     @DeleteMapping("/{id}")
-    public String deleteUser(@PathVariable int id) {
+    public String delete(@PathVariable int id) {
         userService.deleteUserFromFriendsWhenUserDeleted(id);
         userStorage.delete(id);
         return "пользователь удален";
     }
 
     @PostMapping
-    public ResponseEntity<User> createUser(@Valid @RequestBody User user
+    public ResponseEntity<User> create(@Valid @RequestBody User user
             , BindingResult bindingResult, HttpServletRequest request) throws ValidationException {
         checkValidationError(request, bindingResult);
         return ResponseEntity.ok(userStorage.create(user));
     }
 
     @PutMapping
-    public ResponseEntity<User> updateUser(@Valid @RequestBody User user
+    public ResponseEntity<User> update(@Valid @RequestBody User user
             , BindingResult bindingResult
             , HttpServletRequest request) throws ValidationException {
 

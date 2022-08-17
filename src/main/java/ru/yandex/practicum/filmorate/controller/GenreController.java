@@ -25,14 +25,14 @@ public class GenreController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Genre> getGenreById(HttpServletRequest request, @PathVariable int id) {
+    public ResponseEntity<Genre> getById(HttpServletRequest request, @PathVariable int id) {
         log.info("Получен запрос к эндпоинту: '{} {}'",
                 request.getMethod(), request.getRequestURI());
         return ResponseEntity.ok(genresDao.getById(id));
     }
 
     @GetMapping
-    public List<Genre> findAllGenres(HttpServletRequest request) {
+    public List<Genre> findAll(HttpServletRequest request) {
         log.info("Получен запрос к эндпоинту: '{} {}'",
                 request.getMethod(), request.getRequestURI());
         return genresDao.getAll();

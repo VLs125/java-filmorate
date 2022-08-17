@@ -72,8 +72,7 @@ public class FriendshipDao {
                 "FROM USER " +
                 "WHERE ID IN(SELECT USER_RECEIVED_INVITE FROM FRIENDSHIP WHERE USER_SENDER_INVITE = ?) ";
         try {
-            final List<User> users = jdbcTemplate.query(sql, UserDBStorage::makeUser, id);
-            return users;
+            return jdbcTemplate.query(sql, UserDBStorage::makeUser, id);
         } catch (Exception ex) {
             throw new ObjectNotFoundException();
         }

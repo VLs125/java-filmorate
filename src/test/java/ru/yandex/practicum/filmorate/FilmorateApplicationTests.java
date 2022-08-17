@@ -12,7 +12,6 @@ import ru.yandex.practicum.filmorate.dao.FilmDBStorage;
 import ru.yandex.practicum.filmorate.dao.UserDBStorage;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.util.List;
@@ -28,7 +27,6 @@ class FilmorateApplicationTests {
     private final UserDBStorage userStorage;
     private final UserService userService;
     private final FilmDBStorage filmDBStorage;
-    private final FilmService filmService;
 
     @Test
     @Order(1)

@@ -26,14 +26,14 @@ public class MpaController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Mpa> getMpaById(HttpServletRequest request, @PathVariable int id) {
+    public ResponseEntity<Mpa> getById(HttpServletRequest request, @PathVariable int id) {
         log.info("Получен запрос к эндпоинту: '{} {}'",
                 request.getMethod(), request.getRequestURI());
         return ResponseEntity.ok(mpaDao.getById(id));
     }
 
     @GetMapping
-    public List<Mpa> findAllMpa(HttpServletRequest request) {
+    public List<Mpa> findAll(HttpServletRequest request) {
         log.info("Получен запрос к эндпоинту: '{} {}'",
                 request.getMethod(), request.getRequestURI());
         return mpaDao.getAll();

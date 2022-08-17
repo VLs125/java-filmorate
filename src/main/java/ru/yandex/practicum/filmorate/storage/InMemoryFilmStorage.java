@@ -11,8 +11,8 @@ import java.util.List;
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
 
-    private final HashMap<Long, Film> films = new HashMap<>();
-    private long id = 1;
+    private final HashMap<Integer, Film> films = new HashMap<>();
+    private int id = 1;
 
     @Override
     public Film getById(int id) {
@@ -22,15 +22,11 @@ public class InMemoryFilmStorage implements FilmStorage {
         return films.get(id);
     }
 
-    public List<Film> getMostPopularFilms(String count) {
-        return new ArrayList<>();
-    }
-
     @Override
     public void create(Film film) {
-//        film.setId(getId());
-//        incrementId();
-//        films.put(film.getId(), film);
+        film.setId(getId());
+        incrementId();
+        films.put(film.getId(), film);
     }
 
     @Override
@@ -38,7 +34,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         if (!films.containsKey(film.getId())) {
             throw new ObjectNotFoundException();
         }
-//        films.put(film.getId(), film);
+        films.put(film.getId(), film);
 
     }
 
@@ -55,7 +51,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         return new ArrayList<>(films.values());
     }
 
-    private long getId() {
+    private int getId() {
         return id;
     }
 
