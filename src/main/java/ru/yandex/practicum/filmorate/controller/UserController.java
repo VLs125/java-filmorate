@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -23,7 +24,7 @@ public class UserController {
     UserService userService;
 
     @Autowired
-    public UserController(UserStorage userStorage, UserService userService) {
+    public UserController(@Qualifier("userDBStorage") UserStorage userStorage, UserService userService) {
         this.userStorage = userStorage;
         this.userService = userService;
     }
@@ -37,35 +38,33 @@ public class UserController {
     }
 
     @GetMapping()
-    public List<User> findAllUsers(HttpServletRequest request) {
+    public List<User> findAll(HttpServletRequest request) {
         log.info("Получен запрос к эндпоинту: '{} {}'",
                 request.getMethod(), request.getRequestURI());
         return userStorage.getAll();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUser(@PathVariable long id) {
+    public ResponseEntity<User> getById(@PathVariable int id) {
         return ResponseEntity.ok(userStorage.getById(id));
     }
 
     @DeleteMapping("/{id}")
-    public String deleteUser(@PathVariable long id) {
-        userService.deleteUserFromFriendsStorage(id);
+    public String delete(@PathVariable int id) {
+        userService.deleteUserFromFriendsWhenUserDeleted(id);
         userStorage.delete(id);
         return "пользователь удален";
     }
 
     @PostMapping
-    public ResponseEntity<User> createUser(@Valid @RequestBody User user
+    public ResponseEntity<User> create(@Valid @RequestBody User user
             , BindingResult bindingResult, HttpServletRequest request) throws ValidationException {
-
         checkValidationError(request, bindingResult);
-        long id = userStorage.create(user);
-        return ResponseEntity.ok(userStorage.getById(id));
+        return ResponseEntity.ok(userStorage.create(user));
     }
 
     @PutMapping
-    public ResponseEntity<User> updateUser(@Valid @RequestBody User user
+    public ResponseEntity<User> update(@Valid @RequestBody User user
             , BindingResult bindingResult
             , HttpServletRequest request) throws ValidationException {
 
@@ -73,33 +72,33 @@ public class UserController {
 
         log.info("Получен запрос к эндпоинту: '{} {}' c телом '{}'",
                 request.getMethod(), request.getRequestURI(), user);
-        userStorage.update(user);
-        return ResponseEntity.ok(user);
+
+        return ResponseEntity.ok(userStorage.update(user));
     }
 
     @PutMapping("/{id}/friends/{friendId}")
     @ResponseStatus(code = HttpStatus.OK)
-    public String addToFriends(@PathVariable long id, @PathVariable long friendId) {
+    public String addToFriends(@PathVariable int id, @PathVariable int friendId) {
         userService.addToFriends(id, friendId);
-        return "Лайк поставлен";
+        return "Пользователь добавлен в друзья";
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
     @ResponseStatus(code = HttpStatus.OK)
-    public String deleteFromFriends(@PathVariable long id, @PathVariable long friendId) {
+    public String deleteFromFriends(@PathVariable int id, @PathVariable int friendId) {
         userService.deleteFromFriends(id, friendId);
-        return "Лайк удален";
+        return "Пользователь удален";
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")
     @ResponseStatus(code = HttpStatus.OK)
-    public List<User> getAllCommonFriends(@PathVariable long id, @PathVariable long otherId) {
+    public List<User> getAllCommonFriends(@PathVariable int id, @PathVariable int otherId) {
         return userService.getAllCommonFriends(id, otherId);
     }
 
     @GetMapping("/{id}/friends")
     @ResponseStatus(code = HttpStatus.OK)
-    public List<User> getAllFriends(@PathVariable long id) {
+    public List<User> getAllFriends(@PathVariable int id) {
         return userService.getAllFriends(id);
     }
 

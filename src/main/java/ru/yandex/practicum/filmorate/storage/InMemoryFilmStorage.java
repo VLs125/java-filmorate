@@ -11,11 +11,11 @@ import java.util.List;
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
 
-    private final HashMap<Long, Film> films = new HashMap<>();
-    private long id = 1;
+    private final HashMap<Integer, Film> films = new HashMap<>();
+    private int id = 1;
 
     @Override
-    public Film getById(long id) {
+    public Film getById(int id) {
         if (!films.containsKey(id)) {
             throw new ObjectNotFoundException();
         }
@@ -39,7 +39,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public void delete(long id) {
+    public void delete(int id) {
         if (!films.containsKey(id)) {
             throw new ObjectNotFoundException();
         }
@@ -51,7 +51,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         return new ArrayList<>(films.values());
     }
 
-    private long getId() {
+    private int getId() {
         return id;
     }
 

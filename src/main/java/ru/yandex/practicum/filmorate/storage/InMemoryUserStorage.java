@@ -11,20 +11,20 @@ import java.util.List;
 @Component
 public class InMemoryUserStorage implements UserStorage {
 
-    private long id = 1;
-    private final HashMap<Long, User> users = new HashMap<>();
+    private int id = 1;
+    private final HashMap<Integer, User> users = new HashMap<>();
 
     @Override
-    public long create(User user) {
+    public User create(User user) {
         checkName(user);
         user.setId(getId());
         users.put(user.getId(), user);
         incrementId();
-        return user.getId();
+        return user;
     }
 
     @Override
-    public void delete(long userId) {
+    public void delete(int userId) {
         if (!users.containsKey(userId)) {
             throw new ObjectNotFoundException();
         }
@@ -32,12 +32,13 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public void update(User user) {
+    public User update(User user) {
         if (!users.containsKey(user.getId())) {
             throw new ObjectNotFoundException();
         }
         checkName(user);
         users.put(user.getId(), user);
+        return user;
     }
 
     @Override
@@ -46,14 +47,14 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User getById(long id) {
+    public User getById(int id) {
         if (!users.containsKey(id)) {
             throw new ObjectNotFoundException();
         }
         return users.get(id);
     }
 
-    private long getId() {
+    private int getId() {
         return id;
     }
 

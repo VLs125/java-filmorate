@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -26,37 +27,39 @@ public class FilmController {
     FilmService filmService;
 
     @Autowired
-    public FilmController(FilmStorage filmStorage, FilmService filmService) {
+    public FilmController(@Qualifier("filmDBStorage") FilmStorage filmStorage, FilmService filmService) {
         this.filmStorage = filmStorage;
         this.filmService = filmService;
     }
 
 
     @GetMapping
-    public List<Film> findAllFilms(HttpServletRequest request) {
+    public List<Film> findAll(HttpServletRequest request) {
         log.info("Получен запрос к эндпоинту: '{} {}'",
                 request.getMethod(), request.getRequestURI());
         return filmStorage.getAll();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Film> getFilmById(HttpServletRequest request, @PathVariable int id) {
+    public ResponseEntity<Film> getById(HttpServletRequest request, @PathVariable int id) {
         log.info("Получен запрос к эндпоинту: '{} {}'",
                 request.getMethod(), request.getRequestURI());
         return ResponseEntity.ok(filmStorage.getById(id));
     }
 
     @DeleteMapping("/{id}")
-    public String deleteFilm(HttpServletRequest request, @PathVariable int id) {
+    public String delete(HttpServletRequest request, @PathVariable int id) {
         log.info("Получен запрос к эндпоинту: '{} {}'",
                 request.getMethod(), request.getRequestURI());
         filmStorage.delete(id);
         filmService.deleteFilmFromRating(id);
+        filmService.deleteLikeFromFilm(id);
+        filmService.updateFilmRating(id);
         return "Фильм удален";
     }
 
     @PostMapping
-    public ResponseEntity<Film> createFilm(@Valid @RequestBody Film film
+    public ResponseEntity<Film> create(@Valid @RequestBody Film film
             , BindingResult bindingResult, HttpServletRequest request) throws ValidationException {
 
         checkValidationError(request, bindingResult);
@@ -64,13 +67,14 @@ public class FilmController {
         log.info("Получен запрос к эндпоинту: '{} {}' c телом '{}'",
                 request.getMethod(), request.getRequestURI(), film);
         filmStorage.create(film);
-        filmService.addFilmToRatingWithoutLikes(film);
+        filmService.addFilmToRating(film);
+        filmService.addGenreFromFilm(film);
         return ResponseEntity.ok(film);
 
     }
 
     @PutMapping
-    public ResponseEntity<Film> updateFilm(@Valid @RequestBody Film film
+    public ResponseEntity<Film> update(@Valid @RequestBody Film film
             , BindingResult bindingResult
             , HttpServletRequest request) throws ValidationException {
 
@@ -79,28 +83,33 @@ public class FilmController {
         log.info("Получен запрос к эндпоинту: '{} {}' c телом '{}'",
                 request.getMethod(), request.getRequestURI(), film);
         filmStorage.update(film);
+        filmService.updateFilmRating(film.getId());
+        filmService.deleteGenresFromFilm(film.getId());
+        filmService.addGenreFromFilm(film);
         return ResponseEntity.ok(film);
 
     }
 
     @PutMapping("/{id}/like/{userId}")
     @ResponseStatus(code = HttpStatus.OK)
-    public String addLikesToFilm(@PathVariable long id, @PathVariable long userId) {
+    public String addLikes(@PathVariable int id, @PathVariable int userId) {
         filmService.addLikeToFilm(id, userId);
+        filmService.updateFilmRating(id);
         return "Лайк поставлен";
     }
 
     @DeleteMapping("/{id}/like/{userId}")
     @ResponseStatus(code = HttpStatus.OK)
-    public String deleteLikesFromFilm(@PathVariable long id, @PathVariable long userId) {
+    public String deleteLike(@PathVariable int id, @PathVariable int userId) {
         filmService.deleteLikeFromFilm(id, userId);
+        filmService.updateFilmRating(id);
         return "Лайк удален";
     }
 
     @GetMapping("/popular")
     @ResponseStatus(code = HttpStatus.OK)
-    public List<Film> getPopularFilmsByCount(@RequestParam(required = false, defaultValue = "10") String count) {
-        return filmService.getTenMostPopularFilms(count);
+    public List<Film> getPopularByCount(@RequestParam(required = false, defaultValue = "10") String count) {
+        return filmService.getMostPopularFilms(count);
     }
 
 }
